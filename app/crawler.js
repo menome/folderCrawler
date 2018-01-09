@@ -9,10 +9,10 @@ var conf = require('./config');
 var crypto = require('crypto');
 var async = require('async');
 var mime = require('mime-types');
-var copier = require('./copier')
-var logger = new(require('caterpillar').Logger)();
 var path = require('path');
 var bot = require('@menome/botframework');
+var minioUploader = require('./minioUploader');
+var fs = require('fs');
 
 module.exports = {
   CrawlFolder
@@ -20,20 +20,17 @@ module.exports = {
 
 // Crawls a folder. Runs queries to put the folder structure in the graph.
 // Copies the successfully merged files into a directory.
-function CrawlFolder(line, cb) {
+function CrawlFolder(line, bucketDest, cb) {
   line = path.normalize(line);
-  console.log("Starting folder crawler on: " + line);
+  bucketDest = path.posix.normalize(bucketDest);
+  bot.logger.info("Starting folder crawler on: " + line);
   var filesToCopy = [];
-  logger.pipe(require('fs').createWriteStream('./debug.log'));
-  var minioUploader = require('./minioUploader');
-
+  
   var whitelist = new RegExp(conf.get("crawler.matchRegex"));
 
+  // Find all files.
   dir.files(line, function(err, files) {
-    if(err) {
-      console.log("ERROR LOGGED" + err.toString());
-      files = [];
-    }
+    if(err) return bot.logger.info(err.toString())
 
     // Iterate through one at a time. Don't keep going until we run our query.
     async.eachSeries(files, (file, next) => {
@@ -41,62 +38,34 @@ function CrawlFolder(line, cb) {
 
       // Process file here.
       file = path.normalize(file);
-      var rootDir = line.split(path.sep).pop();
-      var toTrim = line.replace(rootDir,"");
-
-      // If we have a preservedDepth
-      var preservedDepth = conf.get("crawler.preserveDepth");
-      if(!!preservedDepth && preservedDepth > 0) {
-        var pathList = line.split(path.sep);
-        toTrim = pathList.slice(0,preservedDepth).join(path.sep);
-      }
-
-      var destFilePath = file.replace(toTrim,""); //Path relative to our folder.
+      var destFilePath = path.join(bucketDest,path.posix.normalize(file))
       var folderStructure = destFilePath.split(path.sep).filter(itm=>!!itm) // Path split into an array of names.
 
       // Run the query to add the file to the graph.
       var query = queryBuilder.mergeFileAndSubdirQuery(folderStructure, file);
-
-      bot.query(query.compile(), query.params()).then((itm) => {
-        console.log("Added file", file)
+      return bot.query(query.compile(), query.params()).then((itm) => {
+        bot.logger.info("Added file", file);
         fileObj = {
-          dest: destFilePath.substr(1, destFilePath.length).replace(/\\/g,"/"),
+          dest: destFilePath,
           loc: file,
           mime: mime.lookup(file)
         };
         filesToCopy.push(fileObj);
-        //filesToCopy.push([file, path.join(destPrefix, destFilePath)])
         return next();
       }).catch((err) => {
-        console.log("Failed to add file", err.toString())
-        logger.log("ERROR: Error merging subdirectory with graph: " + err.toString());
+        bot.logger.error("Error merging subdirectory with graph: " + err.toString());
         return next();
       })
-    }, function() {
-      console.log("Done graphing: " + line + "\nCopying " + filesToCopy.length + " files to minio");
+    }, () => {
+      bot.logger.info("Done graphing: " + line + ". Copying " + filesToCopy.length + " files to minio");
       // Copy the files that worked.
       async.eachSeries(filesToCopy, (fileToCopy, next) => {
         minioUploader.copyFilePromise(fileToCopy, logger)
         .then(function (res) {
-          logger.log("copy file finished: " + res);
+          bot.logger.info("copy file finished: " + res);
           return next();
         })
-      },function (res) {
-        logger.log("Copy complete, received no errors copying " + filesToCopy.length + " files");
-        console.log("File Copy Complete. Check log for errors");
-        logFile = {
-          loc: "./debug.log",
-          dest: "logs/"+line.replace(/\\/g,"_").replace(path.sep,"_").replace(":","")+"-debug.log", // You're welcome ;)
-          mime: mime.lookup("./debug.log")
-        }
-        minioUploader.copyFilePromise(logFile).then((itm) => {
-          console.log("Log copied into destination.");
-          cb();
-        }).catch((err) => {
-          console.log("Log file not copied:", err.toString());
-          cb();
-        })
-      });
+      })
     });
   });
 }

@@ -51,11 +51,6 @@ var config = convict({
       doc: "Only crawl files that match this regex.",
       format: "*",
       default: ".pdf$|.docx$|.doc$|.pptx$|.txt$"
-    },
-    preserveDepth: {
-      doc: "Preserve the hierarchy depth up to this point",
-      format: 'int',
-      default: 0
     }
   },
   port: bot.configSchema.port,

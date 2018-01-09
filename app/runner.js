@@ -18,9 +18,14 @@ process.on('uncaughtException', (err) => {
 module.exports.run = function() {
   // Don't work on blank lines.
   return async.eachSeries(fs.readFileSync('config/folders.txt').toString().split(/\r?\n/), function(line,next){
-    console.log('===========Running on', line, "====================");    
+    console.log(line)
+    var lines = line.split(',');
+    var dir = lines[0];
+    var dest = lines[1];
+
+    console.log('===========Running on', dir, "====================");
     if(line.trim().length < 1) return next();
-    crawler.CrawlFolder(line, next)
+    crawler.CrawlFolder(dir, dest, next)
   }, function(err) {
     console.log('iterating done');
   });
