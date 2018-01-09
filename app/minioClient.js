@@ -4,12 +4,12 @@
  * Store the singleton minio client here.
  */
 var Minio = require('minio');
-var conf = require('./config');
+var config = require('./config');
 
 module.exports = new Minio.Client({
-  endPoint: conf.minio.endPoint,
-  port: conf.minio.port,
-  secure: conf.minio.secure,
-  accessKey: conf.minio.accessKey,
-  secretKey: conf.minio.secretKey
+  endPoint: config.get("minio.endPoint"),
+  port: config.get("minio.port"),
+  secure: config.get("minio.secure"),
+  accessKey: config.get("minio.accessKey"),
+  secretKey: config.get("minio.secretKey")
 });

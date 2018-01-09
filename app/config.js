@@ -1,44 +1,72 @@
-/*
- * Copyright (C) 2017 Menome Technologies Inc.
- *
- * Merges the external config file with environment variables and default config values.
+/**
+ * Copyright (c) 2017 Menome Technologies Inc.
+ * Configuration for the bot
  */
-var extConf = require('../config/conf');
+"use strict";
+var convict = require('convict');
+var fs = require('fs');
+var bot = require('@menome/botframework')
 
-var defaults = {
+var config = convict({
   minio: {
-    endPoint: 'minio',
-    port: 9000,
-    secure: false,
-    accessKey: 'abcd123',
-    secretKey: 'abcd12345',
-    fileBucket: 'filestore'
+    endPoint: {
+      doc: "The URL of the Minio instance",
+      format: "*",
+      default: "minio",
+      env: "MINIO_HOSTNAME"
+    },
+    port: {
+      doc: "The Port of the Minio instance",
+      format: "port",
+      default: 9000,
+      env: "MINIO_PORT"
+    },
+    secure: {
+      doc: "Do we use SSL to connect to Minio?",
+      format: "Boolean",
+      default: false,
+      env: "MINIO_SECURE"
+    },
+    accessKey: {
+      doc: "S3-Style Access Key for Minio",
+      format: "*",
+      default: 'abcd123',
+      env: "MINIO_ACCESS_KEY"
+    },
+    secretKey: {
+      doc: "S3-Style Secret Key for Minio",
+      format: "*",
+      default: 'abcd12345',
+      env: "MINIO_SECRET_KEY",
+      sensitive: true
+    },
+    fileBucket: {
+      doc: "The name of the bucket we'll crawl on full sync",
+      format: "*",
+      default: 'filestore'
+    }
   },
-  neo4j: {
-    url: 'bolt://neo4j',
-    user: 'neo4j',
-    pass: 'neo4j'
+  crawler: {
+    matchRegex: {
+      doc: "Only crawl files that match this regex.",
+      format: "*",
+      default: ".pdf$|.docx$|.doc$|.pptx$|.txt$"
+    },
+    preserveDepth: {
+      doc: "Preserve the hierarchy depth up to this point",
+      format: 'int',
+      default: 0
+    }
   },
-  dir: {
-    destName: 'output',
-    preservedDepth: 3,
-    samba: 'true'
-  },
-  regex: {
-    match: ".pdf$|.docx$|.doc$|.pptx$|.txt$"
-  },
-  stopFolders: [
-    "fart"
-  ]
+  port: bot.configSchema.port,
+  logging: bot.configSchema.logging,
+  neo4j: bot.configSchema.neo4j,
+})
+
+// Load from file.
+if (fs.existsSync('./config/config.json')) {
+  config.loadFile('./config/config.json');
 }
 
-// Merged external conf and default conf, prioritizing external conf.
-var mergedConf = {};
-Object.assign(mergedConf, defaults, extConf)
-
-if(process.env.NEO4J_URL) mergedConf.neo4j.url = process.env.NEO4J_URL;
-if(process.env.NEO4J_USER) mergedConf.neo4j.user = process.env.NEO4J_USER;
-if(process.env.NEO4J_PASS) mergedConf.neo4j.pass = process.env.NEO4J_PASS;
-
 // Export the config.
-module.exports = mergedConf;
+module.exports = config;

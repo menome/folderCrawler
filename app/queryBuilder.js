@@ -4,7 +4,6 @@
  * Logic for building database queries.
  */
 var Query = require('decypher').Query;
-var db = require('./database');
 
 module.exports = {
   mergeFileAndSubdirQuery
@@ -56,7 +55,7 @@ function mergeFileAndSubdirQuery(folderStructure, line) {
   query.set("file.DateAdded = {dateAdded}")
   query.param('dateAdded', new Date().toUTCString())
   query.set("file.OriginalPath = {originalPath}")
-  query.set("PendingUpload = true")
+  query.set("file.PendingUpload = true")
   query.param('originalPath', line)
   return query;
 }

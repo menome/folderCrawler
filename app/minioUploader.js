@@ -1,40 +1,26 @@
 var minioClient = require('./minioClient');
 var fs = require('fs');
 var conf = require('./config');
-var smb2 = require('./sambaClient')
+
 module.exports = {
   copyFilePromise,
   copyMultiFilePromise
 }
 
-
-
-
 function copyFilePromise(fileObj) {
   // console.log("Copying file: " + fileObj.loc + " to minio");
   return new Promise(function (accept, reject) {
-    if(conf.dir.samba){
-      smb2.readFile(fileObj.loc, function(error, data){
-        if(error) return reject(error.toString());
-        minioClient.putObject('filestore', fileObj.dest, data, fileObj.mime, function(err, etag) {
-          fileStream.close();
-          if (err) return reject(err.toString());
-          else return accept(etag);
-        })
-      })
-    }else{
-      var fileStream = fs.createReadStream(fileObj.loc);
-      fileStream.on('error', (err) => {return reject(err.toString())});
+    var fileStream = fs.createReadStream(fileObj.loc);
+    fileStream.on('error', (err) => {return reject(err.toString())});
 
-      var fileStat = fs.stat(fileObj.loc, function(err,stats) {
-        if(err) return reject(err.toString());
-        minioClient.putObject('filestore', fileObj.dest, fileStream, fileObj.mime, function(err, etag) {
-          fileStream.close();
-          if (err) return reject(err.toString());
-          else return accept(etag);
-        })
+    var fileStat = fs.stat(fileObj.loc, function(err,stats) {
+      if(err) return reject(err.toString());
+      minioClient.putObject('filestore', fileObj.dest, fileStream, fileObj.mime, function(err, etag) {
+        fileStream.close();
+        if (err) return reject(err.toString());
+        else return accept(etag);
       })
-    }
+    })
   })
 }
 

@@ -5,7 +5,6 @@
  */
 var dir = require('node-dir');
 var queryBuilder = require('./queryBuilder');
-var db = require('./database');
 var conf = require('./config');
 var crypto = require('crypto');
 var async = require('async');
@@ -13,20 +12,22 @@ var mime = require('mime-types');
 var copier = require('./copier')
 var logger = new(require('caterpillar').Logger)();
 var path = require('path');
+var bot = require('@menome/botframework');
+
 module.exports = {
   CrawlFolder
 }
 
 // Crawls a folder. Runs queries to put the folder structure in the graph.
 // Copies the successfully merged files into a directory.
-function CrawlFolder(line, destPrefix,cb) {
+function CrawlFolder(line, cb) {
   line = path.normalize(line);
   console.log("Starting folder crawler on: " + line);
   var filesToCopy = [];
   logger.pipe(require('fs').createWriteStream('./debug.log'));
   var minioUploader = require('./minioUploader');
 
-  var whitelist = new RegExp(conf.regex.match);
+  var whitelist = new RegExp(conf.get("crawler.matchRegex"));
 
   dir.files(line, function(err, files) {
     if(err) {
@@ -44,9 +45,10 @@ function CrawlFolder(line, destPrefix,cb) {
       var toTrim = line.replace(rootDir,"");
 
       // If we have a preservedDepth
-      if(!!conf.dir.preservedDepth && conf.dir.preservedDepth > 0) {
+      var preservedDepth = conf.get("crawler.preserveDepth");
+      if(!!preservedDepth && preservedDepth > 0) {
         var pathList = line.split(path.sep);
-        toTrim = pathList.slice(0,conf.dir.preservedDepth).join(path.sep);
+        toTrim = pathList.slice(0,preservedDepth).join(path.sep);
       }
 
       var destFilePath = file.replace(toTrim,""); //Path relative to our folder.
@@ -54,11 +56,9 @@ function CrawlFolder(line, destPrefix,cb) {
 
       // Run the query to add the file to the graph.
       var query = queryBuilder.mergeFileAndSubdirQuery(folderStructure, file);
-      // console.log(query)
-      //console.log(path.join(destPrefix, destFilePath))
 
-      db.query(query.compile(), query.params()).then((itm) => {
-        // console.log("Added file", file)
+      bot.query(query.compile(), query.params()).then((itm) => {
+        console.log("Added file", file)
         fileObj = {
           dest: destFilePath.substr(1, destFilePath.length).replace(/\\/g,"/"),
           loc: file,
@@ -68,7 +68,7 @@ function CrawlFolder(line, destPrefix,cb) {
         //filesToCopy.push([file, path.join(destPrefix, destFilePath)])
         return next();
       }).catch((err) => {
-        //console.log("Failed to add file", err.toString())
+        console.log("Failed to add file", err.toString())
         logger.log("ERROR: Error merging subdirectory with graph: " + err.toString());
         return next();
       })
@@ -82,7 +82,6 @@ function CrawlFolder(line, destPrefix,cb) {
           return next();
         })
       },function (res) {
-        db.closeDriver();
         logger.log("Copy complete, received no errors copying " + filesToCopy.length + " files");
         console.log("File Copy Complete. Check log for errors");
         logFile = {
