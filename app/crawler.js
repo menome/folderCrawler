@@ -3,7 +3,6 @@
  *
  * Crawls a file tree, copies it, and turns it into graph nodes.
  */
-var dir = require('node-dir');
 var queryBuilder = require('./queryBuilder');
 var conf = require('./config');
 var crypto = require('crypto');
@@ -13,6 +12,7 @@ var path = require('path');
 var bot = require('@menome/botframework');
 var minioUploader = require('./minioUploader');
 var fs = require('fs');
+const { execFile } = require('child_process');
 
 module.exports = {
   CrawlFolder
@@ -28,9 +28,10 @@ function CrawlFolder(line, bucketDest, cb) {
   
   var whitelist = new RegExp(conf.get("crawler.matchRegex"));
 
-  // Find all files.
-  dir.files(line, function(err, files) {
+  // Find all files
+  execFile("find", [line], (err, stdout, stderr) => {
     if(err) return bot.logger.info(err.toString())
+    var files = stdout.split("\n");
 
     // Iterate through one at a time. Don't keep going until we run our query.
     async.eachSeries(files, (file, next) => {
@@ -38,7 +39,7 @@ function CrawlFolder(line, bucketDest, cb) {
 
       // Process file here.
       file = path.normalize(file);
-      var destFilePath = path.join(bucketDest,path.posix.normalize(file))
+      var destFilePath = path.join(bucketDest,path.posix.normalize(file).replace(line,''))
       var folderStructure = destFilePath.split(path.sep).filter(itm=>!!itm) // Path split into an array of names.
 
       // Run the query to add the file to the graph.
@@ -60,12 +61,12 @@ function CrawlFolder(line, bucketDest, cb) {
       bot.logger.info("Done graphing: " + line + ". Copying " + filesToCopy.length + " files to minio");
       // Copy the files that worked.
       async.eachSeries(filesToCopy, (fileToCopy, next) => {
-        minioUploader.copyFilePromise(fileToCopy, logger)
+        minioUploader.copyFilePromise(fileToCopy, bot.logger)
         .then(function (res) {
           bot.logger.info("copy file finished: " + res);
           return next();
         })
       })
     });
-  });
+  })
 }

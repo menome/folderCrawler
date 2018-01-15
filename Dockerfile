@@ -5,6 +5,9 @@ FROM node:8.4.0
 EXPOSE 80
 ENV PORT 80
 
+# Install stuff for samba mounting
+RUN apt-get update && apt-get install -y cifs-utils
+
 # Commands will run in this directory
 RUN mkdir /srv/app
 WORKDIR /srv/app
