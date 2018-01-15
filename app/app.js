@@ -23,7 +23,11 @@ bot.registerEndpoint({
   "method": "POST",
   "desc": "Crawl the filesystem. Upload files to Minio"
 }, function(req,res) {
-  res.send("Starting filesystem crawl");
+  res.send(bot.responseWrapper({
+    status: "success",
+    message: "Starting filesystem crawl"
+  }))
+
   return runner.run();
 });
 

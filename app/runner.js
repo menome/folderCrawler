@@ -19,9 +19,9 @@ process.on('uncaughtException', (err) => {
 module.exports.run = function() {
   // First thing we do is ensure that our mounts are mounted.
   if (fs.existsSync('./config/mount.sh')) {
+    console.log("Ensuring directories are mounted.")
     return exec('/bin/bash ./config/mount.sh', (err,stdout,stderr) => {
       if(err) throw err;
-      console.log(stdout);
       return runCrawl();
     })
   }
