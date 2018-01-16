@@ -49,6 +49,7 @@ function mergeFileAndSubdirQuery(folderStructure, line) {
   // Finally merge in the file at the end.
   query.merge("(f" + (fileIdx - 1) + ")-[:ContainsFile]->(file:Card:File {Uri: {fileUri}, Name: {fileName}})")
   query.param('fileUri', paths[fileIdx])
+  console.log(folderStructure[fileIdx])
   query.param('fileName', folderStructure[fileIdx])
 
   //query.with("file")

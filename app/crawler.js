@@ -41,7 +41,7 @@ function CrawlFolder(line, bucketDest, cb) {
       file = path.normalize(file);
       var destFilePath = path.join(bucketDest,path.posix.normalize(file).replace(line,''))
       var folderStructure = destFilePath.split(path.sep).filter(itm=>!!itm) // Path split into an array of names.
-
+      console.log(folderStructure)
       // Run the query to add the file to the graph.
       var query = queryBuilder.mergeFileAndSubdirQuery(folderStructure, file);
       return bot.query(query.compile(), query.params()).then((itm) => {

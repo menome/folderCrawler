@@ -17,16 +17,22 @@ process.on('uncaughtException', (err) => {
 });
 
 module.exports.run = function() {
-  // First thing we do is ensure that our mounts are mounted.
-  if (fs.existsSync('./config/mount.sh')) {
-    console.log("Ensuring directories are mounted.")
-    return exec('/bin/bash ./config/mount.sh', (err,stdout,stderr) => {
-      if(err) throw err;
-      return runCrawl();
-    })
-  }
-  else 
-    return runCrawl();
+  return new Promise((resolve, reject) => {
+    // First thing we do is ensure that our mounts are mounted.
+    if (fs.existsSync('./config/mount.sh')) {
+      console.log("Ensuring directories are mounted.")
+      exec('/bin/bash ./config/mount.sh', (err,stdout,stderr) => {
+        if(err) return reject(err);
+        runCrawl();
+        return resolve()
+      })
+    }
+    else {
+      runCrawl()
+      return resolve();
+    }
+  })
+
 }
 
 function runCrawl() {
