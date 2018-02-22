@@ -15,7 +15,7 @@ function copyFilePromise(fileObj) {
 
     var fileStat = fs.stat(fileObj.loc, function(err,stats) {
       if(err) return reject(err.toString());
-      minioClient.putObject('filestore', fileObj.dest, fileStream, fileObj.mime, function(err, etag) {
+      minioClient.putObject(conf.get("minio.fileBucket"), fileObj.dest, fileStream, fileObj.mime, function(err, etag) {
         fileStream.close();
         if (err) return reject(err.toString());
         else return accept(etag);

@@ -1,1 +1,0 @@
-/home/konrad/menome/misc/crawler_test:test_import

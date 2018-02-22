@@ -32,22 +32,18 @@ module.exports.run = function() {
       return resolve();
     }
   })
-
 }
 
 function runCrawl() {
-  // Don't work on blank lines.
-  return async.eachSeries(fs.readFileSync('./config/folders.txt').toString().split(/\r?\n/), function(line,next){
-    if(line[0] === '#') return next();
-    var lines = line.split(':');
-    var dir = lines[0];
-    var dest = lines[1];
-
-    console.log('===========Running on', dir, "====================");
-    if(line.trim().length < 1) return next();
-    else return crawler.CrawlFolder(dir, dest, next)
+  var folderConf = require("../config/folders.json")
+  return async.eachSeries(folderConf.folders, function(entry,next){
+    if(!!entry.disabled) return next();
+    
+    console.log('===========Running on', entry.localpath, "====================");
+    if(entry.localpath.trim().length < 1) return next();
+    else return crawler.CrawlFolder(entry.localpath, entry.destpath, entry.uncprefix, next)
   }, function(err) {
-    if(err) console.error(err.toString())
+    if(err) return console.error(err.toString())
     console.log('iterating done');
   });
 }

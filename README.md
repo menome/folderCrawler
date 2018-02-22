@@ -11,14 +11,22 @@
 
 Edit `config/config.json` to configure how the crawler connects to Minio and Neo4j.
 
-Edit `config/folders.txt` so that it contains lines of the form:
+Edit `config/folders.json` so that it is of the form:
 ```
-<absolute path to source>:<path to destination in Minio>
-/home/konrad/menome/misc/crawler_test:test_import
+{
+  "folders": [
+    {
+      "localpath": "/home/konrad/menome/misc/crawler_test",
+      "destpath": "test_import",
+      "uncprefix": "\\\\10.2.200.118\\konrad\\crawler_test"
+    }
+  ]
+}
 ```
-You can begin a line with a `#` character and that line will be ignored in the input.
+You can set `disabled: true` on an entry to omit it from the import.
+The destpath is where we put the file in the bucket.
 
-Inside of Docker, the folders.txt config should have absolute source paths as they can be found inside the container. You should mount any volumes you wish to crawl inside the container with standard docker container mappings.
+Inside of Docker, the folders.json config should have absolute source paths as they can be found inside the container. You should mount any volumes you wish to crawl inside the container with standard docker container mappings. The UNC prefix must be explicitly configured.
 
 ### Samba/NFS/Other Mount Type Configuration
 

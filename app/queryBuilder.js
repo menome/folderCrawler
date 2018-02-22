@@ -9,7 +9,7 @@ module.exports = {
   mergeFileAndSubdirQuery
 };
 
-function mergeFileAndSubdirQuery(folderStructure, line) {
+function mergeFileAndSubdirQuery(folderStructure, line, uncPath) {
   var query = new Query();
   var fileIdx = folderStructure.length - 1;
 
@@ -28,7 +28,7 @@ function mergeFileAndSubdirQuery(folderStructure, line) {
   var folderMergeStmts = [];
   paths.forEach((itm, idx) => {
     if (idx === paths.length - 1) return;
-    folderMergeStmts.push("(f" + idx + ":Card:Folder {Uri: {folderUri_" + idx + "}, Name: {folderName_" + idx + "}})")
+    folderMergeStmts.push("(f" + idx + ":Card:Folder {Uri: $folderUri_" + idx + ", Name: $folderName_" + idx + "})")
     query.param('folderUri_' + idx, paths[idx]);
     query.param('folderName_' + idx, folderStructure[idx]);
   })
@@ -47,16 +47,15 @@ function mergeFileAndSubdirQuery(folderStructure, line) {
   })
 
   // Finally merge in the file at the end.
-  query.merge("(f" + (fileIdx - 1) + ")-[:ContainsFile]->(file:Card:File {Uri: {fileUri}, Name: {fileName}})")
+  query.merge("(f" + (fileIdx - 1) + ")-[:ContainsFile]->(file:Card:File {Uri: $fileUri, Name: $fileName})")
   query.param('fileUri', paths[fileIdx])
-  console.log(folderStructure[fileIdx])
   query.param('fileName', folderStructure[fileIdx])
 
   //query.with("file")
-  query.set("file.DateAdded = {dateAdded}")
+  query.set("file.DateAdded = $dateAdded")
   query.param('dateAdded', new Date().toUTCString())
-  query.set("file.OriginalPath = {originalPath}")
+  query.set("file.UNCPath = $UNCPath")
   query.set("file.PendingUpload = true")
-  query.param('originalPath', line)
+  query.param('UNCPath', uncPath)
   return query;
 }
