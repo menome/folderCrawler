@@ -41,7 +41,7 @@ function CrawlFolder(line, bucketDest, originPrefix, cb) {
       file = path.normalize(file);
       var originPath = originPrefix + path.posix.normalize(file).replace(line,'');
       var destFilePath = path.join(bucketDest,path.posix.normalize(file).replace(line,''))
-      var folderStructure = destFilePath.split(path.sep).filter(itm=>!!itm) // Path split into an array of names.
+      var folderStructure = path.join(conf.get("minio.fileBucket"),destFilePath).split(path.sep).filter(itm=>!!itm) // Path split into an array of names.
 
       // Run the query to add the file to the graph.
       var query = queryBuilder.mergeFileAndSubdirQuery(folderStructure, file, originPath);
