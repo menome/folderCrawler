@@ -20,7 +20,7 @@ module.exports = {
 
 // Crawls a folder. Runs queries to put the folder structure in the graph.
 // Copies the successfully merged files into a directory.
-function CrawlFolder(line, bucketDest, uncPrefix, cb) {
+function CrawlFolder(line, bucketDest, originPrefix, cb) {
   line = path.normalize(line);
   bucketDest = path.posix.normalize(bucketDest);
   bot.logger.info("Starting folder crawler on: " + line);
@@ -39,12 +39,12 @@ function CrawlFolder(line, bucketDest, uncPrefix, cb) {
 
       // Process file here.
       file = path.normalize(file);
-      var uncPath = uncPrefix + path.win32.normalize(path.posix.normalize(file).replace(line,''));
+      var originPath = originPrefix + path.posix.normalize(file).replace(line,'');
       var destFilePath = path.join(bucketDest,path.posix.normalize(file).replace(line,''))
       var folderStructure = destFilePath.split(path.sep).filter(itm=>!!itm) // Path split into an array of names.
 
       // Run the query to add the file to the graph.
-      var query = queryBuilder.mergeFileAndSubdirQuery(folderStructure, file, uncPath);
+      var query = queryBuilder.mergeFileAndSubdirQuery(folderStructure, file, originPath);
       return bot.query(query.compile(), query.params()).then((itm) => {
         bot.logger.info("Added file", file);
         fileObj = {

@@ -41,7 +41,7 @@ function runCrawl() {
     
     console.log('===========Running on', entry.localpath, "====================");
     if(entry.localpath.trim().length < 1) return next();
-    else return crawler.CrawlFolder(entry.localpath, entry.destpath, entry.uncprefix, next)
+    else return crawler.CrawlFolder(entry.localpath, entry.destpath, entry.originprefix, next)
   }, function(err) {
     if(err) return console.error(err.toString())
     console.log('iterating done');

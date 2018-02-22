@@ -9,7 +9,7 @@ module.exports = {
   mergeFileAndSubdirQuery
 };
 
-function mergeFileAndSubdirQuery(folderStructure, line, uncPath) {
+function mergeFileAndSubdirQuery(folderStructure, line, originPath) {
   var query = new Query();
   var fileIdx = folderStructure.length - 1;
 
@@ -54,8 +54,8 @@ function mergeFileAndSubdirQuery(folderStructure, line, uncPath) {
   //query.with("file")
   query.set("file.DateAdded = $dateAdded")
   query.param('dateAdded', new Date().toUTCString())
-  query.set("file.UNCPath = $UNCPath")
+  query.set("file.OriginPath = $OriginPath")
   query.set("file.PendingUpload = true")
-  query.param('UNCPath', uncPath)
+  query.param('OriginPath', originPath)
   return query;
 }
