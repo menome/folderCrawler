@@ -15,6 +15,7 @@
     "pass": "graphPaper!"
   },
   "crawler": {
-    "matchRegex": ".pdf$|.docx$|.doc$|.pptx$|.txt$|.jpg$|.png$"
+    "matchRegex": ".pdf$|.docx$|.doc$|.pptx$|.txt$|.jpg$|.png$",
+    "findRegex": ".*\\.\\(pdf\\|docx\\|doc\\|pptx\\|txt\\|jpg\\|png\\)$"
   }
 }
