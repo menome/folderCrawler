@@ -27,15 +27,15 @@ function CrawlFolder(line, bucketDest, originPrefix, cb) {
   var filesToCopy = [];
   
   var whitelist = new RegExp(conf.get("crawler.matchRegex"));
-
+  
   // Find all files
-  execFile("find", [line], (err, stdout, stderr) => {
+  execFile("find", [line, "-type", "f", "-regextype", "grep", "-iregex", conf.get("crawler.findRegex")], (err, stdout, stderr) => {
     if(err) return bot.logger.info(err.toString())
     var files = stdout.split("\n");
 
     // Iterate through one at a time. Don't keep going until we run our query.
     async.eachSeries(files, (file, next) => {
-      if(!file.match(whitelist)) return next();
+      if(!file.match(whitelist)) { return next(); }
 
       // Process file here.
       file = path.normalize(file);

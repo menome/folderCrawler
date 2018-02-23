@@ -48,7 +48,12 @@ var config = convict({
   },
   crawler: {
     matchRegex: {
-      doc: "Only crawl files that match this regex.",
+      doc: "Only extract data from files that match this regex. Javascript-style regex.",
+      format: "*",
+      default: ".pdf$|.docx$|.doc$|.pptx$|.txt$"
+    },
+    matchRegex: {
+      doc: "Only find files that match this regex. Grep-type regex. (Gets piped into the UNIX find command)",
       format: "*",
       default: ".pdf$|.docx$|.doc$|.pptx$|.txt$"
     }
