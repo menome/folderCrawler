@@ -29,6 +29,7 @@ function CrawlFolder(localCrawlDir, bucketDest, originPrefix, cb) {
 
   var findcmd = spawn("find", [localCrawlDir, "-type", "f", "-regextype", "grep", "-iregex", conf.get("crawler.findRegex")]);
   var rl = readline.createInterface({ input: findcmd.stdout });
+  var findFinished = false;
 
   var workQueue = async.queue((task,callback) => {
     task().then(()=>{ callback(); })
@@ -38,9 +39,20 @@ function CrawlFolder(localCrawlDir, bucketDest, originPrefix, cb) {
     bot.logger.error(err.toString());
   })
 
+  findcmd.on("close", (code) => {findFinished = true})
+
   rl.on('line', (input) => {
     workQueue.push(processFile.bind(this,{fileName: input, bucketDest, originPrefix, localCrawlDir}));
   })
+
+  // Called when our work queue is empty.
+  // If our work queue is empty AND our crawling command has finished, then we're done here.
+  workQueue.drain = () => {
+    if(findFinished === true) {
+      bot.logger.info("Finished crawling",localCrawlDir);
+      return cb();
+    }
+  }
 }
 
 
