@@ -27,7 +27,7 @@ function CrawlFolder(localCrawlDir, bucketDest, originPrefix, cb) {
   bucketDest = path.posix.normalize(bucketDest);
   bot.logger.info("Starting folder crawler on: " + localCrawlDir);
 
-  var findcmd = spawn("find", [localCrawlDir, "-type", "f", "-regextype", "grep", "-iregex", conf.get("crawler.findRegex")]);
+  var findcmd = spawn("find", [localCrawlDir, "-type", "f", "-regextype", "grep", "-iregex", conf.get("crawler.findRegex"), "!", "-size", "0"]);
   var rl = readline.createInterface({ input: findcmd.stdout });
   var findFinished = false;
 
