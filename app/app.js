@@ -39,10 +39,10 @@ bot.registerEndpoint({
 
 // Register our sync endpoint.
 bot.registerEndpoint({
-  "name": "Crawl",
+  "name": "CrawlSingle",
   "path": "/crawl/:idx",
   "method": "POST",
-  "desc": "Crawl the (idx)th configured filesystem. Upload files to Minio",
+  "desc": "Crawl only the (idx)th configured filesystem. Upload files to Minio",
   "params": [
     {
       "name": "skip",
