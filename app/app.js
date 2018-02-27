@@ -21,15 +21,50 @@ bot.registerEndpoint({
   "name": "Crawl",
   "path": "/crawl",
   "method": "POST",
-  "desc": "Crawl the filesystem. Upload files to Minio"
+  "desc": "Crawl all filesystems. Upload files to Minio"
 }, function(req,res) {
-  return runner.run().then(() => {
+  return runner.run({}).then(() => {
     res.send(bot.responseWrapper({
       status: "success",
       message: "Starting filesystem crawl"
     }))
   }).catch((err) => {
-    console.log(err)
+    bot.logger.error(err)
+    res.send(bot.responseWrapper({
+      status: "failure",
+      message: err.toString()
+    }))
+  });
+});
+
+// Register our sync endpoint.
+bot.registerEndpoint({
+  "name": "Crawl",
+  "path": "/crawl/:idx",
+  "method": "POST",
+  "desc": "Crawl the (idx)th configured filesystem. Upload files to Minio",
+  "params": [
+    {
+      "name": "skip",
+      "desc": "Skip this many crawled files before starting to import/process. Can be used as a hacky way to resume interrupted crawl jobs."
+    }
+  ]
+}, function(req,res) {
+  var skipVal = Number(req.query.skip) || undefined;
+  var idx = Number(req.params.idx);
+
+  if(isNaN(idx)) return res.json(bot.responseWrapper({
+    status: "failure",
+    message: "Invalid folder index."
+  }))
+
+  return runner.run({idx, skip: skipVal}).then(() => {
+    res.send(bot.responseWrapper({
+      status: "success",
+      message: "Starting filesystem crawl"
+    }))
+  }).catch((err) => {
+    bot.logger.error(err)
     res.send(bot.responseWrapper({
       status: "failure",
       message: err.toString()

@@ -11,6 +11,7 @@
     "mime-types": "^2.1.15",
     "express": "latest",
     "node-dir": "^0.1.17",
+    "async": "^2.6.0",
     "uuid": "^3.1.0",
     "neo4j-driver": "^1.4.0",
     "minio": "^3.1.3",

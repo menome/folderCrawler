@@ -57,6 +57,7 @@ function mergeFileAndSubdirQuery(folderStructure, line, originPath) {
   query.set("file.OriginPath = $OriginPath")
   query.set("file.PendingUpload = true")
   query.set("file.ExistsInFilestore = true")
+  query.set("file.SourceSystems = ['FolderCrawler']")
   query.param('OriginPath', originPath)
   return query;
 }

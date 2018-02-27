@@ -22,9 +22,11 @@ module.exports = {
 
 // Crawls a folder. Runs queries to put the folder structure in the graph.
 // Copies the successfully merged files into a directory.
-function CrawlFolder(localCrawlDir, bucketDest, originPrefix, cb) {
+function CrawlFolder({localCrawlDir, bucketDest, originPrefix, skipTo}, cb) {
   localCrawlDir = path.normalize(localCrawlDir);
   bucketDest = path.posix.normalize(bucketDest);
+  var parsedLines = 0; //Start the index at 1. We want it to match our uploaded file count.
+  var parsedFiles = 0;
   bot.logger.info("Starting folder crawler on: " + localCrawlDir);
 
   var findcmd = spawn("find", [localCrawlDir, "-type", "f", "-regextype", "grep", "-iregex", conf.get("crawler.findRegex"), "!", "-size", "0"]);
@@ -32,7 +34,13 @@ function CrawlFolder(localCrawlDir, bucketDest, originPrefix, cb) {
   var findFinished = false;
 
   var workQueue = async.queue((task,callback) => {
-    task().then(()=>{ callback(); })
+    task().then((resp)=>{
+      parsedFiles++;
+      if(resp === 'skipped') bot.logger.info("Skipped File", parsedFiles) 
+      else bot.logger.info("Finished processing item", parsedFiles) 
+
+      callback(); 
+    })
   })
   
   findcmd.on("error", (err) => {
@@ -42,6 +50,8 @@ function CrawlFolder(localCrawlDir, bucketDest, originPrefix, cb) {
   findcmd.on("close", (code) => {findFinished = true})
 
   rl.on('line', (input) => {
+    parsedLines++;
+    if(typeof skipTo === 'number' && parsedLines < skipTo) return workQueue.push(()=>{return Promise.resolve('skipped')});
     workQueue.push(processFile.bind(this,{fileName: input, bucketDest, originPrefix, localCrawlDir}));
   })
 
@@ -55,11 +65,12 @@ function CrawlFolder(localCrawlDir, bucketDest, originPrefix, cb) {
   }
 }
 
-
 // Updates the graph with the new file. Then uploads the file to Minio.
 // Returns a promise that resolves when both of these things are done.
 function processFile({fileName, bucketDest, originPrefix, localCrawlDir}) {
   if(!fileName.match(whitelist)) { return Promise.resolve(false) }
+
+  bot.logger.info("Processing:", fileName);
 
   // Process file here.
   fileName = path.normalize(fileName);
@@ -70,7 +81,7 @@ function processFile({fileName, bucketDest, originPrefix, localCrawlDir}) {
   // Run the query to add the file to the graph.
   var query = queryBuilder.mergeFileAndSubdirQuery(folderStructure, fileName, originPath);
   return bot.query(query.compile(), query.params()).then((itm) => {
-    bot.logger.info("Added file to graph. Now uploading to Minio:", fileName);
+    bot.logger.info("Added file to graph.");
 
     // Now build our file object for uploading to Minio
     fileObj = {
@@ -80,7 +91,7 @@ function processFile({fileName, bucketDest, originPrefix, localCrawlDir}) {
     };
 
     return minioUploader.copyFilePromise(fileObj, bot.logger).then(function (res) {
-      bot.logger.info("Copy file finished: " + res);
+      bot.logger.info("File copied to Minio:", res);
     })
   }).catch((err) => {
     bot.logger.error("Error merging subdirectory with graph:", err.toString());
