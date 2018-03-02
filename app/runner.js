@@ -47,7 +47,7 @@ function mountDirs() {
 }
 
 // Crawls a single folder. Specified by its index in the folder config json file.
-function crawlSingle({idx, skipTo}) {
+function crawlSingle({idx, skipTo},cb) {
   var folder = folderConf.folders[idx];
   bot.logger.info('===========Running on', folder.localpath, "====================");
   return new Promise((resolve,reject) => {
@@ -56,7 +56,10 @@ function crawlSingle({idx, skipTo}) {
       bucketDest: folder.destpath, 
       originPrefix: folder.originprefix,
       skipTo: skipTo
-    },resolve);
+    },() => {
+      if(!!cb) cb();
+      return resolve();
+    });
   })
 }
 
