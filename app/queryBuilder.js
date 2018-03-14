@@ -4,6 +4,7 @@
  * Logic for building database queries.
  */
 var Query = require('decypher').Query;
+var config = require('./config');
 
 module.exports = {
   mergeFileAndSubdirQuery
@@ -56,7 +57,7 @@ function mergeFileAndSubdirQuery(folderStructure, line, originPath) {
   query.param('dateAdded', new Date().toUTCString())
   query.set("file.OriginPath = $OriginPath")
   query.set("file.PendingUpload = true")
-  query.set("file.ExistsInFilestore = true")
+  query.set("file.ExistsInFilestore = $ExistsInFilestore", {ExistsInFilestore: config.get('crawler.existsInFilestore')})
   query.set("file.SourceSystems = ['FolderCrawler']")
   query.param('OriginPath', originPath)
   return query;

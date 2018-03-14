@@ -56,6 +56,12 @@ var config = convict({
       doc: "Only find files that match this regex. Grep-type regex. (Gets piped into the UNIX find command)",
       format: "*",
       default: ".pdf$|.docx$|.doc$|.pptx$|.txt$"
+    },
+    existsInFilestore: {
+      doc: "If true, set ExistsInFilestore=true on the created nodes for all crawled files. Use this if you plan on having theLink hotlink to the existing filestore, rather than host the files itself.",
+      format: "Boolean",
+      env: "SET_EXISTS_IN_FILESTORE",
+      default: false
     }
   },
   port: bot.configSchema.port,
