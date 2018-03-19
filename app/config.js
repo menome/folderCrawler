@@ -57,6 +57,11 @@ var config = convict({
       format: "*",
       default: ".pdf$|.docx$|.doc$|.pptx$|.txt$"
     },
+    blacklistRegex: {
+      doc: "If found files match this regex, discard them. Don't crawl.",
+      format: "*",
+      default: "^[~.]"
+    },
     existsInFilestore: {
       doc: "If true, set ExistsInFilestore=true on the created nodes for all crawled files. Use this if you plan on having theLink hotlink to the existing filestore, rather than host the files itself.",
       format: "Boolean",

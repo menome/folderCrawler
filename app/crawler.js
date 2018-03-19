@@ -15,6 +15,7 @@ var fs = require('fs');
 const { execFile, spawn } = require('child_process');
 const readline = require('readline');
 const whitelist = new RegExp(conf.get("crawler.matchRegex"));
+const blacklist = new RegExp(conf.get("crawler.blacklistRegex"));
 
 module.exports = {
   CrawlFolder
@@ -69,6 +70,7 @@ function CrawlFolder({localCrawlDir, bucketDest, originPrefix, skipTo}, cb) {
 // Returns a promise that resolves when both of these things are done.
 function processFile({fileName, bucketDest, originPrefix, localCrawlDir}) {
   if(!fileName.match(whitelist)) { return Promise.resolve(false) }
+  if(fileName.match(blacklist)) { return Promise.resolve(false) }
 
   bot.logger.info("Processing:", fileName);
 
