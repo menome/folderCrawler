@@ -69,16 +69,17 @@ function CrawlFolder({localCrawlDir, bucketDest, originPrefix, skipTo}, cb) {
 // Updates the graph with the new file. Then uploads the file to Minio.
 // Returns a promise that resolves when both of these things are done.
 function processFile({fileName, bucketDest, originPrefix, localCrawlDir}) {
-  if(!fileName.match(whitelist)) { return Promise.resolve(false) }
-  if(fileName.match(blacklist)) { return Promise.resolve(false) }
-
-  bot.logger.info("Processing:", fileName);
-
   // Process file here.
   fileName = path.normalize(fileName);
   var originPath = originPrefix + path.posix.normalize(fileName).replace(localCrawlDir,'');
   var destFilePath = path.join(bucketDest,path.posix.normalize(fileName).replace(localCrawlDir,''))
   var folderStructure = path.join(conf.get("minio.fileBucket"),destFilePath).split(path.sep).filter(itm=>!!itm) // Path split into an array of names.
+
+  var baseName = path.basename(fileName);
+  if(!baseName.match(whitelist)) { return Promise.resolve(false) }
+  if(baseName.match(blacklist)) { return Promise.resolve(false) }
+
+  bot.logger.info("Processing:", fileName);
 
   // Run the query to add the file to the graph.
   var query = queryBuilder.mergeFileAndSubdirQuery(folderStructure, fileName, originPath);
