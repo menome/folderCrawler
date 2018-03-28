@@ -48,19 +48,22 @@ var config = convict({
   },
   crawler: {
     findRegex: {
-      doc: "Only find files whose path matches this regex. Grep-type regex. (Gets piped into the UNIX find command)",
+      doc: "Only find files whose path matches this regex. Grep-type regex. (Gets piped into the UNIX find command. Must be double-escaped.)",
       format: "*",
       default: ".pdf$|.docx$|.doc$|.pptx$|.txt$"
     },
-    matchRegex: {
-      doc: "Only extract data from files that match this regex. Javascript-style regex. Applied only to filenames, not paths.",
-      format: "*",
-      default: ".pdf$|.docx$|.doc$|.pptx$|.txt$"
-    },
-    blacklistRegex: {
-      doc: "If found files match this regex, discard them. Javascript-style regex. Applied only to filenames, not paths.",
-      format: "*",
-      default: "^[~.]"
+    regexWhitelist: {
+      doc: "Array of regexes. File is accepted if its full path matches any of these.",
+      default: [],
+      format: function check(regexes) {
+        regexes.forEach((regex) => {
+          if((typeof regex !== 'string'))
+            throw new Error('Regexes must be a string.');
+
+          // This will throw errors if it can't be a regex.
+          var tmp = new RegExp(regex)
+        })
+      }
     },
     existsInFilestore: {
       doc: "If true, set ExistsInFilestore=true on the created nodes for all crawled files. Use this if you plan on having theLink hotlink to the existing filestore, rather than host the files itself.",
@@ -77,6 +80,7 @@ var config = convict({
 // Load from file.
 if (fs.existsSync('./config/config.json')) {
   config.loadFile('./config/config.json');
+  config.validate();
 }
 
 // Export the config.

@@ -14,8 +14,9 @@ var minioUploader = require('./minioUploader');
 var fs = require('fs');
 const { execFile, spawn } = require('child_process');
 const readline = require('readline');
-const whitelist = new RegExp(conf.get("crawler.matchRegex"));
-const blacklist = new RegExp(conf.get("crawler.blacklistRegex"));
+
+// Our list of regexes. Pre-compile them.
+const regexWhitelist = conf.get("crawler.regexWhitelist").map(x=>new RegExp(x,"i"));
 
 module.exports = {
   CrawlFolder
@@ -75,9 +76,14 @@ function processFile({fileName, bucketDest, originPrefix, localCrawlDir}) {
   var destFilePath = path.join(bucketDest,path.posix.normalize(fileName).replace(localCrawlDir,''))
   var folderStructure = path.join(conf.get("minio.fileBucket"),destFilePath).split(path.sep).filter(itm=>!!itm) // Path split into an array of names.
 
-  var baseName = path.basename(fileName);
-  if(!baseName.match(whitelist)) { return Promise.resolve(false) }
-  if(baseName.match(blacklist)) { return Promise.resolve(false) }
+  // If it doesn't match any of our whitelisted regexes, don't crawl it.
+  var shouldCrawl = false;
+  for(var i=0;!shouldCrawl && i<regexWhitelist.length;i++) {
+    if(!!fileName.match(regexWhitelist[i])) 
+      shouldCrawl = true;
+  }
+
+  if(!shouldCrawl && regexWhitelist.length > 0) return Promise.resolve(false);
 
   bot.logger.info("Processing:", fileName);
 
