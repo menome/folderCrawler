@@ -56,7 +56,7 @@ function mergeFileAndSubdirQuery(folderStructure, line, originPath) {
   query.set("file.DateAdded = $dateAdded")
   query.param('dateAdded', new Date().toUTCString())
   query.set("file.OriginPath = $OriginPath")
-  query.set("file.FileUri = $fileUri")
+  query.set("file.FileOpenPath = $OriginPath")
   query.set("file.PendingUpload = true")
   query.set("file.ExistsInFilestore = $ExistsInFilestore", {ExistsInFilestore: config.get('crawler.existsInFilestore')})
   query.set("file.SourceSystems = ['FolderCrawler']")
