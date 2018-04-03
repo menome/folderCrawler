@@ -17,6 +17,7 @@ const readline = require('readline');
 
 // Our list of regexes. Pre-compile them.
 const regexWhitelist = conf.get("crawler.regexWhitelist").map(x=>new RegExp(x,"i"));
+const regexFilenameWhitelist = conf.get("crawler.regexFilenameWhitelist").map(x=>new RegExp(x,"i"));
 
 module.exports = {
   CrawlFolder
@@ -78,12 +79,22 @@ function processFile({fileName, bucketDest, originPrefix, localCrawlDir}) {
 
   // If it doesn't match any of our whitelisted regexes, don't crawl it.
   var shouldCrawl = false;
-  for(var i=0;!shouldCrawl && i<regexWhitelist.length;i++) {
-    if(!!fileName.match(regexWhitelist[i])) 
-      shouldCrawl = true;
+  if(regexFilenameWhitelist.length === 0 && regexWhitelist.length > 0) {
+    for(var i=0;!shouldCrawl && i<regexWhitelist.length;i++) {
+      if(!!fileName.match(regexWhitelist[i])) 
+        shouldCrawl = true;
+    }
+  } else if(regexFilenameWhitelist.length > 0) {
+    var basename = path.basename(fileName);
+    for(var i=0;!shouldCrawl && i<regexFilenameWhitelist.length;i++) {
+      if(!!basename.match(regexFilenameWhitelist[i])) 
+        shouldCrawl = true;
+    }
+  } else {
+    shouldCrawl = true;
   }
-
-  if(!shouldCrawl && regexWhitelist.length > 0) return Promise.resolve(false);
+  
+  if(!shouldCrawl) return Promise.resolve(false);
 
   bot.logger.info("Processing:", fileName);
 

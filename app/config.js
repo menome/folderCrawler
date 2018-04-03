@@ -65,6 +65,19 @@ var config = convict({
         })
       }
     },
+    regexFilenameWhitelist: {
+      doc: "Array of regexes. File is accepted if its name matches any of these.",
+      default: [],
+      format: function check(regexes) {
+        regexes.forEach((regex) => {
+          if((typeof regex !== 'string'))
+            throw new Error('Regexes must be a string.');
+
+          // This will throw errors if it can't be a regex.
+          var tmp = new RegExp(regex)
+        })
+      }
+    },
     existsInFilestore: {
       doc: "If true, set ExistsInFilestore=true on the created nodes for all crawled files. Use this if you plan on having theLink hotlink to the existing filestore, rather than host the files itself.",
       format: "Boolean",
