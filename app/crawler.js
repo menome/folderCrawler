@@ -78,9 +78,13 @@ function CrawlFolder({localCrawlDir, bucketDest, originPrefix, skipTo}, cb) {
 function processFile({fileName, bucketDest, originPrefix, localCrawlDir}) {
   // Process file here.
   fileName = path.normalize(fileName);
+  var basename = path.basename(fileName);
   var originPath = originPrefix + path.posix.normalize(fileName).replace(localCrawlDir,'');
   var destFilePath = path.join(bucketDest,path.posix.normalize(fileName).replace(localCrawlDir,''))
   var folderStructure = path.join(conf.get("minio.fileBucket"),destFilePath).split(path.sep).filter(itm=>!!itm) // Path split into an array of names.
+
+  // Do not crawl hidden files. Because that would be rude.
+  if(basename.startsWith('.')) return Promise.resolve("skipped");
 
   // If it doesn't match any of our whitelisted regexes, don't crawl it.
   var shouldCrawl = false;
@@ -90,7 +94,7 @@ function processFile({fileName, bucketDest, originPrefix, localCrawlDir}) {
         shouldCrawl = true;
     }
   } else if(regexFilenameWhitelist.length > 0) {
-    var basename = path.basename(fileName);
+    
     for(var i=0;!shouldCrawl && i<regexFilenameWhitelist.length;i++) {
       if(!!basename.match(regexFilenameWhitelist[i])) 
         shouldCrawl = true;
