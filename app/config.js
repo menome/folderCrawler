@@ -88,6 +88,7 @@ var config = convict({
   port: bot.configSchema.port,
   logging: bot.configSchema.logging,
   neo4j: bot.configSchema.neo4j,
+  nickname: bot.configSchema.nickname
 })
 
 // Load from file.

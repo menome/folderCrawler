@@ -1,5 +1,6 @@
 {
   "port": 3005,
+  "nickname": "Development File Crawler",
   "minio": {
     "endPoint": "localhost",
     "port": 8000,

@@ -13,7 +13,8 @@ bot.configure({
   desc: "Crawls the filesystem and uploads files to Minio",
   logging: config.get('logging'),
   port: config.get('port'),
-  neo4j: config.get('neo4j')
+  neo4j: config.get('neo4j'),
+  nickname: config.get('nickname')
 });
 
 // Register our sync endpoint.
