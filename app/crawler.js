@@ -94,7 +94,7 @@ function processFile({fileName, bucketDest, originPrefix, localCrawlDir}) {
     shouldCrawl = true;
   }
   
-  if(!shouldCrawl) return Promise.resolve(false);
+  if(!shouldCrawl) return Promise.resolve("skipped");
 
   bot.logger.info("Processing:", fileName);
 
