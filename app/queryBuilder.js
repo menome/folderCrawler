@@ -58,7 +58,12 @@ function mergeFileAndSubdirQuery(folderStructure, line, originPath) {
   query.set("file.OriginPath = $OriginPath")
   query.set("file.FileOpenPath = $OriginPath")
   query.set("file.PendingUpload = true")
+
+  // TODO: Deprecate ExistsInFilestore in favour of like, 'deleteafterprocessing' or something.
   query.set("file.ExistsInFilestore = $ExistsInFilestore", {ExistsInFilestore: config.get('crawler.existsInFilestore')})
+  query.set("file.PersistFile = $PersistFile", {PersistFile: config.get('crawler.persistFile')})
+  query.set("file.FileLibrary = 'sambadav'") // Set which File Librarian we use for this file.
+
   query.set("file.SourceSystems = ['FolderCrawler']")
   query.param('OriginPath', originPath)
   return query;

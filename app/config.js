@@ -78,11 +78,17 @@ var config = convict({
         })
       }
     },
-    existsInFilestore: {
+    existsInFilestore: { // TODO: Deprecate.
       doc: "If true, set ExistsInFilestore=true on the created nodes for all crawled files. Use this if you plan on having theLink hotlink to the existing filestore, rather than host the files itself.",
       format: "Boolean",
       env: "SET_EXISTS_IN_FILESTORE",
       default: false
+    },
+    persistFile: {
+      doc: "If false, delete this file from our primary filestore (usually Minio) after processing.",
+      format: "Boolean",
+      env: "SET_PERSIST_FILE",
+      default: true
     }
   },
   port: bot.configSchema.port,

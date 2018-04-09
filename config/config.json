@@ -19,6 +19,7 @@
     "findRegex": ".*\\.\\(pdf\\|docx\\|doc\\|pptx\\|txt\\|jpg\\|png\\)$",
     "regexWhitelist": [],
     "regexFilenameWhitelist": [],
-    "existsInFilestore": true
+    "existsInFilestore": true,
+    "persistFile": false
   }
 }

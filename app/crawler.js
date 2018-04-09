@@ -56,7 +56,6 @@ function CrawlFolder({localCrawlDir, bucketDest, originPrefix, skipTo}, cb) {
   })
 
   rl.on('line', (input) => {
-    console.log("Line")
     parsedLines++;
     if(typeof skipTo === 'number' && parsedLines < skipTo) return workQueue.push(()=>{return Promise.resolve('skipped')});
     workQueue.push(processFile.bind(this,{fileName: input, bucketDest, originPrefix, localCrawlDir}));
@@ -65,7 +64,6 @@ function CrawlFolder({localCrawlDir, bucketDest, originPrefix, skipTo}, cb) {
   // Called when our work queue is empty.
   // If our work queue is empty AND our crawling command has finished, then we're done here.
   workQueue.drain = () => {
-    console.log("Drained")
     if(findFinished === true) {
       bot.logger.info("Finished crawling",localCrawlDir);
       return cb();
