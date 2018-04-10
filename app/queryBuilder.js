@@ -48,7 +48,7 @@ function mergeFileAndSubdirQuery(folderStructure, line, originPath) {
   })
 
   // Finally merge in the file at the end.
-  query.merge("(f" + (fileIdx - 1) + ")-[:ContainsFile]->(file:Card:File {Uri: $fileUri, Name: $fileName})")
+  query.merge("(file:Card:File {Uri: $fileUri, Name: $fileName})")
   query.param('fileUri', paths[fileIdx])
   query.param('fileName', folderStructure[fileIdx])
 
@@ -59,12 +59,13 @@ function mergeFileAndSubdirQuery(folderStructure, line, originPath) {
   query.set("file.FileOpenPath = $OriginPath")
   query.set("file.PendingUpload = true")
 
-  // TODO: Deprecate ExistsInFilestore in favour of like, 'deleteafterprocessing' or something.
+  // TODO: Deprecate ExistsInFilestore in favour of PersistFile or something.
   query.set("file.ExistsInFilestore = $ExistsInFilestore", {ExistsInFilestore: config.get('crawler.existsInFilestore')})
   query.set("file.PersistFile = $PersistFile", {PersistFile: config.get('crawler.persistFile')})
   query.set("file.FileLibrary = 'sambadav'") // Set which File Librarian we use for this file.
 
   query.set("file.SourceSystems = ['FolderCrawler']")
+  query.merge("(f" + (fileIdx - 1) + ")-[:ContainsFile]->(file)")
   query.param('OriginPath', originPath)
   return query;
 }

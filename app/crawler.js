@@ -83,6 +83,7 @@ function processFile({fileName, bucketDest, originPrefix, localCrawlDir}) {
 
   // Do not crawl hidden files. Because that would be rude.
   if(basename.startsWith('.')) return Promise.resolve("skipped");
+  if(basename.startsWith('~')) return Promise.resolve("skipped");
 
   // If it doesn't match any of our whitelisted regexes, don't crawl it.
   var shouldCrawl = false;
