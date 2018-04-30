@@ -56,7 +56,7 @@ function mergeFileAndSubdirQuery(folderStructure, line, originPath) {
   query.set("file.DateAdded = $dateAdded")
   query.param('dateAdded', new Date().toUTCString())
   query.set("file.OriginPath = $OriginPath")
-  query.set("file.FileOpenPath = 'file://'+$OriginPath")
+  //query.set("file.FileOpenPath = 'file://'+$OriginPath")
   query.set("file.PendingUpload = true")
 
   // TODO: Deprecate ExistsInFilestore in favour of PersistFile or something.
