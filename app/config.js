@@ -65,6 +65,19 @@ var config = convict({
         })
       }
     },
+    regexBlacklist: {
+      doc: "Array of regexes. File is rejected if its full path matches any of these.",
+      default: [],
+      format: function check(regexes) {
+        regexes.forEach((regex) => {
+          if((typeof regex !== 'string'))
+            throw new Error('Regexes must be a string.');
+
+          // This will throw errors if it can't be a regex.
+          var tmp = new RegExp(regex)
+        })
+      }
+    },
     regexFilenameWhitelist: {
       doc: "Array of regexes. File is accepted if its name matches any of these.",
       default: [],

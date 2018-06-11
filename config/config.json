@@ -18,6 +18,7 @@
   "crawler": {
     "findRegex": ".*\\.\\(pdf\\|docx\\|doc\\|pptx\\|txt\\|jpg\\|png\\)$",
     "regexWhitelist": [],
+    "regexBlacklist": [],
     "regexFilenameWhitelist": [],
     "existsInFilestore": true,
     "persistFile": false

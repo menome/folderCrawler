@@ -17,6 +17,7 @@ const readline = require('readline');
 
 // Our list of regexes. Pre-compile them.
 const regexWhitelist = conf.get("crawler.regexWhitelist").map(x=>new RegExp(x,"i"));
+const regexBlacklist = conf.get("crawler.regexBlacklist").map(x=>new RegExp(x,"i"));
 const regexFilenameWhitelist = conf.get("crawler.regexFilenameWhitelist").map(x=>new RegExp(x,"i"));
 
 module.exports = {
@@ -87,6 +88,7 @@ function processFile({fileName, bucketDest, originPrefix, localCrawlDir}) {
 
   // If it doesn't match any of our whitelisted regexes, don't crawl it.
   var shouldCrawl = false;
+
   if(regexFilenameWhitelist.length === 0 && regexWhitelist.length > 0) {
     for(var i=0;!shouldCrawl && i<regexWhitelist.length;i++) {
       if(!!fileName.match(regexWhitelist[i])) 
@@ -101,7 +103,15 @@ function processFile({fileName, bucketDest, originPrefix, localCrawlDir}) {
   } else {
     shouldCrawl = true;
   }
-  
+
+  // Then check out blacklist.
+  if(regexBlacklist.length > 0) {
+    for(var i=0;!shouldCrawl && i<regexBlacklist.length;i++) {
+      if(!!fileName.match(regexBlacklist[i])) 
+        shouldCrawl = false;
+    }
+  }
+
   if(!shouldCrawl) return Promise.resolve("skipped");
 
   bot.logger.info("Processing:", fileName);
