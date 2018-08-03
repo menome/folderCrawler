@@ -1,7 +1,7 @@
 {
   "name": "folderCrawler",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Crawls files and folders and generates a structure in theLink",
   "repository": "https://github.com/menome/theLink",
   "license": "Commercial",

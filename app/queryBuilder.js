@@ -5,6 +5,7 @@
  */
 var Query = require('decypher').Query;
 var config = require('./config');
+var uuid = require('uuid/v4');
 
 module.exports = {
   mergeFileAndSubdirQuery
@@ -29,9 +30,10 @@ function mergeFileAndSubdirQuery(folderStructure, line, originPath) {
   var folderMergeStmts = [];
   paths.forEach((itm, idx) => {
     if (idx === paths.length - 1) return;
-    folderMergeStmts.push("(f" + idx + ":Card:Folder {Uri: $folderUri_" + idx + ", Name: $folderName_" + idx + "})")
+    folderMergeStmts.push("(f" + idx + ":Card:Folder {Uri: $folderUri_" + idx + ", Name: $folderName_" + idx + ", Uuid: $folderUuid_"+idx+"})")
     query.param('folderUri_' + idx, paths[idx]);
     query.param('folderName_' + idx, folderStructure[idx]);
+    query.param('folderUuid_' + idx, uuid());
   })
 
   // Merge the folders piece-wise so we don't create duplicate strcutures. This makes a giant chain of MERGE/WITH statements.
@@ -63,6 +65,7 @@ function mergeFileAndSubdirQuery(folderStructure, line, originPath) {
   query.set("file.ExistsInFilestore = $ExistsInFilestore", {ExistsInFilestore: config.get('crawler.existsInFilestore')})
   query.set("file.PersistFile = $PersistFile", {PersistFile: config.get('crawler.persistFile')})
   query.set("file.LibraryKey = 'sambadav'") // Set which File Librarian we use for this file.
+  query.set("file.Uuid = $fileuuid", {fileuuid: uuid()}) // Make sure we have a UUID.
   query.set("file.LibraryPath = $OriginPath") // Set which File Librarian we use for this file.
 
   query.set("file.SourceSystems = ['FolderCrawler']")
