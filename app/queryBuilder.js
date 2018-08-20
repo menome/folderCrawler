@@ -56,7 +56,7 @@ function mergeFileAndSubdirQuery(folderStructure, line, originPath) {
 
   //query.with("file")
   query.set("file.DateAdded = $dateAdded")
-  query.param('dateAdded', new Date().toUTCString())
+  query.param('dateAdded', new Date().toISOString())
   query.set("file.OriginPath = $OriginPath")
   //query.set("file.FileOpenPath = 'file://'+$OriginPath")
   query.set("file.PendingUpload = true")
