@@ -6,12 +6,13 @@
 var Query = require('decypher').Query;
 var config = require('./config');
 var uuid = require('uuid/v4');
+const dateformat = require('dateformat');
 
 module.exports = {
   mergeFileAndSubdirQuery
 };
 
-function mergeFileAndSubdirQuery(folderStructure, line, originPath) {
+function mergeFileAndSubdirQuery(folderStructure, line, originPath, modified) {
   var query = new Query();
   var fileIdx = folderStructure.length - 1;
 
@@ -55,8 +56,9 @@ function mergeFileAndSubdirQuery(folderStructure, line, originPath) {
   query.param('fileName', folderStructure[fileIdx])
 
   //query.with("file")
-  query.set("file.DateAdded = $dateAdded")
-  query.param('dateAdded', new Date().toUTCString())
+  query.set("file.DateAdded = date()")
+  query.set("file.DateModified = date($modified)")
+  query.param("modified", dateformat(modified, 'yyyy-mm-dd'));
   query.set("file.OriginPath = $OriginPath")
   //query.set("file.FileOpenPath = 'file://'+$OriginPath")
   query.set("file.PendingUpload = true")

@@ -116,8 +116,10 @@ function processFile({fileName, bucketDest, originPrefix, localCrawlDir}) {
 
   bot.logger.info("Processing:", fileName);
 
+  var stats = fs.statSync(fileName);
+  
   // Run the query to add the file to the graph.
-  var query = queryBuilder.mergeFileAndSubdirQuery(folderStructure, fileName, originPath);
+  var query = queryBuilder.mergeFileAndSubdirQuery(folderStructure, fileName, originPath, stats.mtime);
   return bot.query(query.compile(), query.params()).then((itm) => {
     bot.logger.info("Added file to graph.");
 
