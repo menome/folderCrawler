@@ -9,7 +9,7 @@ var config = require('./config');
 module.exports = new Minio.Client({
   endPoint: config.get("minio.endPoint"),
   port: config.get("minio.port"),
-  secure: config.get("minio.secure"),
+  secure: config.get("minio.useSSL"),
   accessKey: config.get("minio.accessKey"),
   secretKey: config.get("minio.secretKey")
 });
