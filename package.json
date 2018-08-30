@@ -6,10 +6,10 @@
   "repository": "https://github.com/menome/theLink",
   "license": "Commercial",
   "dependencies": {
-    "forever": "latest",
+    "forever": "^0.15.3",
     "convict": "^4.0.2",
     "mime-types": "^2.1.15",
-    "express": "latest",
+    "express": "^4.16.3",
     "node-dir": "^0.1.17",
     "async": "^2.6.0",
     "uuid": "^3.1.0",
@@ -23,7 +23,7 @@
   "devDependencies": {
     "mocha": "^3.4.2",
     "chai": "^4.1.0",
-    "nodemon": "latest",
+    "nodemon": "^1.18.4",
     "mock-require": "^2.0.1"
   },
   "scripts": {
